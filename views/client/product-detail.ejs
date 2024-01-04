@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products | RedStore</title>
+    <link rel="stylesheet" href="/client_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+</head>
+
+<body>
+    <%- include('./partials/loader') %>
+    <div class="container">
+        <%- include('./partials/navbar') %>
+    </div>
+    <!-- Single Products -->
+    <div class="small-container single-product">
+        <div class="row">
+            <% if(data != '') { %>
+            <div class="col-2">
+                <img src="http://localhost:3000/<%=data.image%>" width="100%" id="ProductImg">
+            </div>
+            <div class="col-2">
+                <h1><%= data.name %></h1>
+                <h4>Brand: <a href="/product/brand/<%= data.cateid.name %>" class="brand-hover"><%= data.cateid.name %></a></h4>
+                <h4>Price: <%= data.price.toLocaleString() %> VNĐ</h4>
+                <h4>Capacity: <%= data.cap %> ML</h4>
+                <input type="number" value="1" name="qty">
+                <button href="" class="btn" onclick="addToCart()">Add To Cart</button>
+
+                <h3>Product Details <i class="fa fa-indent"></i></h3>
+                <br>
+                <p class="description" data-fulltext="<%= data.des %>">
+                    <%= data.des.substring(0, 200) %> <span class="more-link">More</span>
+                </p>
+            </div>
+        </div>
+            <% }else{%>
+                <h1>No DATA</h1>
+            <% } %>
+    </div>
+
+    <!-- title -->
+    <div class="small-container">
+        <div class="row row-2">
+            <h2>Related Products</h2>
+            <a href="/product" class="brand-hover">View More</a>
+        </div>
+    </div>
+    <!-- Products -->
+    <div class="small-container">
+        <div class="row">
+            <% related.forEach(element =>{%>
+                <div class="col-4">
+                    <a href="/product/<%= element._id %>"><img src="http://localhost:3000/<%= element.image %>"></a>
+                    <h4><%= element.name %></h4>
+                    <div class="rating">
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star-o"></i>
+                    </div>
+                    <p><%= element.price.toLocaleString()%> VNĐ</p>
+                </div>
+            <%}) %>
+            
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <%- include('./partials/footer') %>
+
+    <!-- javascript -->
+
+    <script>
+        var MenuItems = document.getElementById("MenuItems");
+        MenuItems.style.maxHeight = "0px";
+        function menutoggle() {
+            if (MenuItems.style.maxHeight == "0px") {
+                MenuItems.style.maxHeight = "200px"
+            }
+            else {
+                MenuItems.style.maxHeight = "0px"
+            }
+        }
+    </script>
+
+    <!-- Add items to local storage -->
+    <script>
+        // Hàm để thêm sản phẩm vào giỏ hàng và lưu vào Local Storage
+        function addToCart() {
+            const item = {
+                name: `<%= data.name %>`,
+                price: '<%= data.price %>',
+                image: document.querySelector('#ProductImg').src,
+                quantity: parseInt(document.querySelector('input[type="number"]').value)
+            };
+
+            // Lấy danh sách sản phẩm từ Local Storage
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
+            const existingItem = cart.find(prod => prod.name === item.name);
+            if (existingItem) {
+                existingItem.quantity += item.quantity;
+            } else {
+                cart.push(item);
+            }
+            // Lưu danh sách sản phẩm đã cập nhật vào Local Storage
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        const descriptions = document.querySelectorAll('.description');
+
+        descriptions.forEach(description => {
+        const fullText = description.dataset.fulltext;
+        const maxLength = 200;
+
+        if (fullText.length > maxLength) {
+            description.innerHTML = fullText.substring(0, maxLength) + '<span class="more-dots"></span><span class="more-content">' + fullText.substring(maxLength) + '</span><span class="more-link"> More</span>';
+        }
+
+        const moreLink = description.querySelector('.more-link');
+        const moreContent = description.querySelector('.more-content');
+
+        if (moreLink) {
+            moreLink.addEventListener('click', () => {
+            if (moreContent.style.display === 'inline') {
+                moreContent.style.display = 'none';
+                moreLink.innerText = ' More';
+            } else {
+                moreContent.style.display = 'inline';
+                moreLink.innerText = ' Less';
+            }
+            });
+        }
+        });
+    </script>
+</body>
+</html>
